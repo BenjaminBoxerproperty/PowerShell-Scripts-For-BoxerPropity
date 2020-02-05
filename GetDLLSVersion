@@ -1,0 +1,59 @@
+#$filestoUse = Get-ChildItem -Filter *.dll -Recurse | Select-Object Name,AssemblyVersion
+
+$startTime = Get-Date -format "MMM-dd-HH:mm:ss"
+
+$elapsedTime = [System.Diagnostics.Stopwatch]::StartNew()
+$scriptPath = "D:\Temp\MobileAPI\"
+#$scriptPath = "\\BPM-DEV-MOB-BC1\C$\inetpub\wwwroot\"
+$counter = 1
+$filestoUse = Get-ChildItem -Path $scriptPath -Recurse -Include *.Dll
+
+write-output "Path analyzed: $scriptPath"
+write-output "DLL files found: " $filestoUse.length
+
+foreach ($f in $filestoUse)
+{
+	
+	$version = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($f).FileVersion
+	$dllName = $f.Name
+	$splitValue = $f.DirectoryName.Split("\")
+	$splitValue = $f.Name
+	
+    #write-output "AssemblyVersion: $f.AssemblyVersion.Number"
+	#write-output "VersionSize: " $version.length
+	if ($version.length -eq 0) {
+		#write-output "$f ** AssemblyVersion: No file version"
+		$dataVersion = "$f ** AssemblyVersion: No file version"
+	}
+	else {
+		#write-output "$f ** AssemblyVersion: $version"
+		$dataVersion = "$f ** AssemblyVersion: $version"
+	}
+	write-output "dllName: $dllName"
+	<# $dllNames = @(
+	[pscustomobject]@{
+			Ctn = $counter
+			dllName = $f.Name-$version
+		}
+	)
+	$dllNames | Export-Csv dllNames.csv -Append -NoTypeInformation #>
+	
+	$dllFiles = @(
+		[pscustomobject]@{
+			Ctn = $counter
+			dllPath = $f.DirectoryName
+			dllName = "$dllname-$version"
+			#AssemblyVersion = $version
+		}
+	)
+	$dllFiles | Export-Csv dllFiles.csv -Append -NoTypeInformation
+	$counter++
+}
+
+
+$currentTime = Get-Date -format "MMM-dd-HH:mm:ss"
+$seconds = $elapsedTime.Elapsed.TotalSeconds
+$elapsedTime.Stop()
+write-output "Elapsed Time (seconds): $seconds"
+
+#D:\Documents\StemmonsStuff\PowerShellScripts\GetDllsVersions.ps1
